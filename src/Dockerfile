@@ -11,7 +11,7 @@ RUN adduser fabio --system --ingroup fabio
 
 # install fabio
 # ADD ssl /etc/ssl/certs
-ADD fabio-linux_amd64 /usr/bin/fabio
+ADD fabio-${VersionFabio}-go1.8.3-linux_amd64 /usr/bin/fabio
 ADD fabio.properties /etc/fabio/fabio.properties
 
 # Run fabio
