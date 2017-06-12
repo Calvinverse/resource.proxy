@@ -82,40 +82,31 @@
         </NuGetFilesToCopy>
         -->
     </ItemGroup>
-    <ItemGroup Condition=" '$(ShouldLoadHttpFilesToCopy)' == 'true' AND '@(HttpFilesToCopy)' == '' ">
-        <HttpFilesToCopy Include="https://github.com/fabiolb/fabio/releases/download/v$(VersionFabio)/fabio-$(VersionFabio).sha256">
-            <Destination>$(DirBuildTempFabio)</Destination>
-            <Password></Password>
-            <UseDefaultCredentials>false</UseDefaultCredentials>
-            <UserName></UserName>
-            <Unzip>false</Unzip>
-        </HttpFilesToCopy>
-        <HttpFilesToCopy Include="https://github.com/fabiolb/fabio/releases/download/v$(VersionFabio)/fabio-$(VersionFabio).sha256.sig">
-            <Destination>$(DirBuildTempFabio)</Destination>
-            <Password></Password>
-            <UseDefaultCredentials>false</UseDefaultCredentials>
-            <UserName></UserName>
-            <Unzip>false</Unzip>
-        </HttpFilesToCopy>
-        <HttpFilesToCopy Include="https://github.com/fabiolb/fabio/releases/download/v$(VersionFabio)/fabio-$(VersionFabio)-go1.8.1-darwin_amd64">
-            <Destination>$(DirBuildTempFabio)</Destination>
-            <Password></Password>
-            <UseDefaultCredentials>false</UseDefaultCredentials>
-            <UserName></UserName>
+    <ItemGroup Condition=" '$(ShouldLoadHttpFilesToCopy)' == 'true' ">
+        <HttpFilesToCopy Include="https://github.com/fabiolb/fabio/releases/download/v${VersionFabio}/fabio-${VersionFabio}-go1.8.3-linux_amd64">
+            <Destination>$(DirBuildTempUbuntu)</Destination>
+            <GpgKey></GpgKey>
+            <HashAlgorithm>SHA256</HashAlgorithm>
+            <Hash>7DC786C3DFD8C770D20E524629D0D7CD2CF8BB84A1BF98605405800B28705198</Hash>
             <Unzip>false</Unzip>
         </HttpFilesToCopy>
     </ItemGroup>
     <ItemGroup Condition=" '$(ShouldLoadFilesToCopy)' == 'true' ">
-        <!--
-        <FilesToCopy Include="">
-            <Destination></Destination>
+        <FilesToCopy
+            Exclude="$(DirSrc)\Dockerfile"
+            Include="$(DirSrc)\**\*">
+            <Destination>$(DirBuildTempUbuntu)</Destination>
         </FilesToCopy>
-        -->
     </ItemGroup>
     <ItemGroup Condition=" '$(ShouldLoadArchiveFilesToCopy)' == 'true' ">
         <!--
         <ArchiveFilesToCopy Include="">
             <Destination></Destination>
+            <GpgKey></GpgKey>
+            <Hash></Hash>
+            <HashAlgorithm></HashAlgorithm>
+            <HashFile></HashFile>
+            <SignatureFile></SignatureFile>
         </ArchiveFilesToCopy>
         -->
     </ItemGroup>
@@ -158,17 +149,12 @@
         Additional parameters can be provided through the 'TemplateTokens' ItemGroup below.
     -->
     <ItemGroup Condition=" '$(ShouldLoadBuildFilesToGenerate)' == 'true' ">
-        <!--
         <BuildFilesToGenerate
-            Condition=" '$(DirBuildTemp)' != '' "
-            Include="$(DirBuildTemp)\MyFile.txt">
+            Condition=" '$(DirSrc)' != '' "
+            Include="$(DirBuildTempUbuntu)\Dockerfile">
             <Encoding>UTF-8</Encoding>
-            <Expression>(MyRegex)</Expression>
-            <ReplacementValue>MyAdditionalTemplateValue</ReplacementValue>
-            <Template>$(DirTemplates)\MyOtherTemplatefile.txt</Template>
-            <Token>MyAdditionalTemplateParameter</Token>
+            <Template>$(DirSrc)\Dockerfile</Template>
         </BuildFilesToGenerate>
-        -->
     </ItemGroup>
 
 
@@ -512,6 +498,21 @@
 
 
     <!--
+        **** DOCKER - PACK ****
+    -->
+    <PropertyGroup>
+        <!-- Indicate that docker should ignore cached images if possible. -->
+        <!-- <DockerIgnoreCache>true</DockerIgnoreCache> -->
+
+        <!-- Indicate that docker should always pull images if possible -->
+        <!-- <DockerAlwaysPull>true</DockerAlwaysPull> -->
+
+        <!-- Indicate that docker should squash intermediate layers when creating an image -->
+        <!-- <DockerSquashImages>true</DockerSquashImages> -->
+    </PropertyGroup>
+
+
+    <!--
         **** PACK - NUGET ****
     -->
     <PropertyGroup>
@@ -734,7 +735,6 @@
             </PostSteps>
         </BuildStepsToExecute>
 
-        <!--
         <BuildStepsToExecute Include="$(BuildStepsPrepareReleaseNotes)">
             <Properties>
             </Properties>
@@ -748,7 +748,6 @@
             <PostSteps>
             </PostSteps>
         </BuildStepsToExecute>
-        -->
 
         <!--
         <BuildStepsToExecute Include="$(BuildStepsPrepareRestoreNpm)">
@@ -812,6 +811,19 @@
                 prepare;
                 prepare.copy;
                 prepare.copy.nuget;
+            </Groups>
+            <PreSteps>
+            </PreSteps>
+            <PostSteps>
+            </PostSteps>
+        </BuildStepsToExecute>
+        <BuildStepsToExecute Include="$(BuildStepsPrepareCopyHttp)">
+            <Properties>
+            </Properties>
+            <Groups>
+                prepare;
+                prepare.copy;
+                prepare.copy.url;
             </Groups>
             <PreSteps>
             </PreSteps>
@@ -915,6 +927,7 @@
         </BuildStepsToExecute>
         -->
 
+        <!--
         <BuildStepsToExecute Include="$(BuildStepsUnitTestNUnit)">
             <Properties>
                 Configuration=$(TestConfiguration);
@@ -930,6 +943,7 @@
             <PostSteps>
             </PostSteps>
         </BuildStepsToExecute>
+        -->
 
         <!--
         <BuildStepsToExecute Include="$(BuildStepsUnitTestMsTest)">
@@ -995,7 +1009,6 @@
             </PostSteps>
         </BuildStepsToExecute>
 
-        <!--
         <BuildStepsToExecute Include="$(BuildStepsUnitTestChefSpec)">
             <Properties>
                 Configuration=$(TestConfiguration);
@@ -1011,7 +1024,6 @@
             <PostSteps>
             </PostSteps>
         </BuildStepsToExecute>
-        -->
 
         <!--
         <BuildStepsToExecute Include="$(BuildStepsAnalyzeXml)">
@@ -1063,6 +1075,7 @@
         </BuildStepsToExecute>
         -->
 
+        <!--
         <BuildStepsToExecute Include="$(BuildStepsPackIso)">
             <Properties>
                 Configuration=$(ProductionConfiguration);
@@ -1091,6 +1104,22 @@
             <PostSteps>
             </PostSteps>
         </BuildStepsToExecute>
+        -->
+        <BuildStepsToExecute Include="$(BuildStepsPackDocker)">
+            <Properties>
+                Configuration=$(ProductionConfiguration);
+                Platform=$(Platform)
+            </Properties>
+            <Groups>
+                package;
+                package.docker;
+            </Groups>
+            <PreSteps>
+            </PreSteps>
+            <PostSteps>
+            </PostSteps>
+        </BuildStepsToExecute>
+        <!--
         <BuildStepsToExecute Include="$(BuildStepsPackNuGet)">
             <Properties>
                 Configuration=$(ProductionConfiguration);
@@ -1105,6 +1134,7 @@
             <PostSteps>
             </PostSteps>
         </BuildStepsToExecute>
+        -->
         <BuildStepsToExecute Include="$(BuildStepsPackZip)">
             <Properties>
                 Configuration=$(ProductionConfiguration);
@@ -1172,6 +1202,6 @@
     -->
 
     <PropertyGroup>
-        <OpsConfigurationVersion>0.2</OpsConfigurationVersion>
+        <OpsConfigurationVersion>0.3</OpsConfigurationVersion>
     </PropertyGroup>
 </Project>
